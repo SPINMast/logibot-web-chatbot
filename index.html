@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogiBot – Chatbots con IA para consultas aduaneras y trazabilidad de carga</title>
+<style>
+:root{--navy:#0a1f3d;--navy2:#12305c;--cyan:#12c8e6;--cyan-d:#0a8fa6;--bg:#f4f8fc;--ink:#14253d;--mut:#5b6b82;--line:#dbe5f0;--white:#fff}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font-weight:800;font-size:1.25rem;letter-spacing:-.3px}.logo b{color:var(--cyan)}
+nav a{margin-left:18px;font-size:.92rem;opacity:.85}nav a:hover{opacity:1;color:var(--cyan)}
+.hero{background:linear-gradient(160deg,var(--navy) 55%,var(--navy2));color:#fff;padding:64px 0 72px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center}
+h1{font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.1;letter-spacing:-1px}
+.hero p{margin:18px 0 26px;color:#c4d4ea;max-width:52ch}
+.btn{display:inline-block;padding:12px 22px;border-radius:8px;font-weight:700;border:0;cursor:pointer;font-size:.95rem}
+.btn.p{background:var(--cyan);color:var(--navy)}.btn.s{border:1.5px solid #4a6a96;color:#fff;margin-left:8px}
+.route{background:rgba(255,255,255,.06);border:1px solid #2b4a78;border-radius:12px;padding:22px}
+.route h3{font-size:.95rem;color:var(--cyan);margin-bottom:14px}
+.rt{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:.9rem}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);flex:none}
+.line{flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--cyan) 0 6px,transparent 6px 12px)}
+section{padding:64px 0}
+h2{font-size:clamp(1.5rem,3vw,2.1rem);color:var(--navy);letter-spacing:-.5px;margin-bottom:8px}
+.sub{color:var(--mut);max-width:70ch;margin-bottom:30px}
+.grid{display:grid;gap:18px}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
+.card h3{color:var(--navy);margin-bottom:6px;font-size:1.05rem}.card p,.card li{color:var(--mut);font-size:.93rem}
+.card ul{padding-left:18px}
+.plan.pro{border:2px solid var(--cyan);box-shadow:0 8px 30px rgba(18,200,230,.18)}
+.price{font-size:2rem;font-weight:800;color:var(--navy);margin:6px 0}.price small{font-size:.85rem;color:var(--mut);font-weight:500}
+.pay{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.tag{font-size:.75rem;background:#e7f7fb;color:var(--cyan-d);padding:3px 9px;border-radius:99px;font-weight:600}
+.dark{background:var(--navy);color:#fff}.dark h2{color:#fff}.dark .sub{color:#b5c6de}
+.dark .card{background:var(--navy2);border-color:#27487a}.dark .card h3{color:var(--cyan)}.dark .card p,.dark .card li{color:#c4d4ea}
+/* Simulador */
+.sim{display:grid;grid-template-columns:260px 1fr;border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:0 10px 40px rgba(10,31,61,.12);background:#fff;height:620px}
+.side{background:var(--navy);color:#fff;padding:16px;overflow:auto}
+.side h4{font-size:.85rem;color:var(--cyan);margin:4px 0 10px}
+.q{display:block;width:100%;text-align:left;background:var(--navy2);color:#fff;border:1px solid #27487a;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;font-size:.85rem}
+.q:hover{border-color:var(--cyan)}
+.chat{display:flex;flex-direction:column;min-width:0}
+.top{background:#0d2a52;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--cyan);color:var(--navy);display:grid;place-items:center;font-weight:800}
+.top small{display:block;color:#7fe3f3;font-size:.75rem}
+.msgs{flex:1;overflow-y:auto;padding:16px;background:#e8eef5;display:flex;flex-direction:column;gap:8px}
+.m{max-width:82%;padding:9px 12px;border-radius:10px;font-size:.92rem;white-space:pre-wrap;word-wrap:break-word;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.m.b{background:#fff;align-self:flex-start;border-top-left-radius:2px}
+.m.u{background:#cdf3fa;align-self:flex-end;border-top-right-radius:2px}
+.m b{color:var(--navy)}
+.m .ok{color:#0a8a4a;font-weight:700}
+.row{display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid var(--line)}
+.row input{flex:1;padding:11px 14px;border:1px solid var(--line);border-radius:99px;font-size:.95rem;min-width:0}
+.row button{border-radius:99px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chips button{border:1px solid var(--cyan-d);background:#fff;color:var(--cyan-d);border-radius:99px;padding:4px 11px;cursor:pointer;font-size:.8rem}
+.typing{opacity:.6;font-style:italic}
+/* métricas */
+.kpi{text-align:center}.kpi .n{font-size:2.6rem;font-weight:800;color:var(--cyan)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}td{padding:9px 6px;border-bottom:1px solid #27487a;vertical-align:top}td:first-child{color:var(--cyan);width:38%;font-weight:600}
+footer{background:#06142a;color:#8fa4c4;text-align:center;padding:26px 20px;font-size:.85rem}
+@media(max-width:860px){.hero .wrap,.g3,.g2{grid-template-columns:1fr}.sim{grid-template-columns:1fr;height:auto}.side{display:flex;gap:8px;overflow-x:auto}.side h4{display:none}.q{min-width:200px;margin:0}.chat{height:560px}nav a:nth-child(n+4){display:none}.btn.s{margin:8px 0 0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><div class="logo">Logi<b>Bot</b></div>
+<nav><a href="#modelo">Modelo</a><a href="#planes">Planes</a><a href="#demo">Simulador</a><a href="#etica">Ética IA</a><a href="#jurado">Jurado</a></nav></div></header>
+
+<div class="hero"><div class="wrap">
+<div><h1>Tu agente aduanero con IA, disponible 24/7 en WhatsApp y web</h1>
+<p>LogiBot automatiza consultas aduaneras, clasificación arancelaria y trazabilidad de contenedores para agentes de carga, importadores y exportadores de México y Chile. Software peruano exportado como servicio.</p>
+<a class="btn p" href="#demo">Probar el simulador</a><a class="btn s" href="#planes">Ver planes</a></div>
+<div class="route"><h3>Exportación de servicios · Modo 1 AGCS</h3>
+<div class="rt"><span class="dot"></span>Lima, Perú (proveedor SaaS)</div><div class="line"></div>
+<div class="rt"><span class="dot"></span>México · SAT / ANAM</div>
+<div class="rt"><span class="dot"></span>Chile · Servicio Nacional de Aduanas</div>
+<p style="font-size:.82rem;margin:12px 0 0">El servicio cruza la frontera por internet; el proveedor no se desplaza.</p></div>
+</div></div>
+
+<section id="modelo"><div class="wrap"><h2>Propuesta de valor</h2>
+<p class="sub">Menos esperas, menos errores de clasificación y visibilidad de la carga sin llamar a nadie.</p>
+<div class="grid g3">
+<div class="card"><h3>Trazabilidad en tiempo real</h3><p>Consulta el estado de cualquier contenedor por código y recibe canal, ubicación y próximo hito.</p></div>
+<div class="card"><h3>Clasificación arancelaria</h3><p>Describe el producto y obtén subpartida del Sistema Armonizado, descripción técnica y Ad-Valorem.</p></div>
+<div class="card"><h3>Liquidación de tributos</h3><p>Ingresa valor CIF y país: calculamos aranceles, IGV/IVA e IPM al instante.</p></div></div>
+<div class="grid g2" style="margin-top:18px">
+<div class="card"><h3>Modo 1 del AGCS: suministro transfronterizo</h3><p>LogiBot se presta desde Perú a clientes en México y Chile mediante suscripción en línea. Es una exportación de servicios: facturación en USD y sin establecimiento físico en destino.</p></div>
+<div class="card"><h3>Adaptado a cada aduana</h3><ul><li>México: terminología y flujos SAT/ANAM</li><li>Chile: Servicio Nacional de Aduanas</li><li>Perú: SUNAT y Ley General de Aduanas</li></ul></div></div></div></section>
+
+<section id="planes" style="background:#fff"><div class="wrap"><h2>Planes de suscripción SaaS</h2><p class="sub">Facturación mensual en USD. Cancela cuando quieras.</p>
+<div class="grid g3">
+<div class="card plan"><h3>Básico</h3><div class="price">$49<small>/mes</small></div><ul><li>1 chatbot web</li><li>500 consultas al mes</li><li>Trazabilidad y clasificación</li></ul><div class="pay"><span class="tag">Stripe</span><span class="tag">Mercado Pago</span></div></div>
+<div class="card plan pro"><h3>Pro</h3><div class="price">$149<small>/mes</small></div><ul><li>Canal WhatsApp Business</li><li>5 000 consultas al mes</li><li>Calculadora de tributos</li><li>API de seguimiento</li></ul><div class="pay"><span class="tag">Stripe</span><span class="tag">Mercado Pago</span></div></div>
+<div class="card plan"><h3>Enterprise</h3><div class="price">A medida</div><ul><li>Consultas ilimitadas</li><li>Integración con tu TMS/ERP</li><li>Soporte dedicado y SLA 99,9 %</li></ul><div class="pay"><span class="tag">Stripe</span><span class="tag">Mercado Pago</span><span class="tag">Transferencia</span></div></div></div></div></section>
+
+<section id="demo"><div class="wrap"><h2>Simulador en vivo</h2>
+<p class="sub">Prueba las tres funciones con los botones o escribe tu consulta. Los datos son simulados con fines de demostración.</p>
+<div class="sim">
+<div class="side"><h4>Consultas rápidas</h4>
+<button class="q" data-t="MSKU9048210">Rastrear MSKU9048210</button>
+<button class="q" data-t="CMAU4512893">Rastrear CMAU4512893</button>
+<button class="q" data-t="palta hass fresca">Clasificar: palta hass fresca</button>
+<button class="q" data-t="laptop gamer">Clasificar: laptop gamer</button>
+<button class="q" data-t="polo de algodón">Clasificar: polo de algodón</button>
+<button class="q" data-t="calcular tributos">Calcular tributos</button></div>
+<div class="chat"><div class="top"><div class="av">L</div><div>LogiBot<small>en línea · responde en segundos</small></div></div>
+<div class="msgs" id="msgs" aria-live="polite"></div>
+<div class="row"><input id="inp" placeholder="Escribe un código de contenedor o un producto…" aria-label="Mensaje"><button class="btn p" id="send">Enviar</button></div></div>
+</div></div></section>
+
+<section id="etica" class="dark"><div class="wrap"><h2>Transparencia y ética de IA</h2>
+<p class="sub">Un asistente aduanero debe poder explicarse. Así trabajamos.</p>
+<div class="grid g3">
+<div class="card"><h3>Base normativa</h3><p>El modelo se entrena con la Ley General de Aduanas del Perú (DL 1053), normativa SUNAT y los acuerdos de la OMC, incluidos el SA y el AGCS.</p></div>
+<div class="card"><h3>Orientativo, no vinculante</h3><p>Las clasificaciones y liquidaciones son estimaciones. La declaración oficial la valida un agente de aduana autorizado.</p></div>
+<div class="card"><h3>Datos y supervisión</h3><p>No usamos los datos de tus embarques para entrenar modelos de terceros. Cada respuesta indica su fuente y puede escalarse a una persona.</p></div></div></div></section>
+
+<section id="jurado"><div class="wrap"><h2>Panel de métricas y ficha técnica</h2><p class="sub">Impacto esperado del piloto y datos académicos del proyecto.</p>
+<div class="grid g3" style="margin-bottom:18px">
+<div class="card kpi"><div class="n" data-c="80">0</div><p>% menos tiempo de atención</p></div>
+<div class="card kpi"><div class="n">24/7</div><p>disponibilidad sin turnos</p></div>
+<div class="card kpi"><div class="n" data-c="3">0</div><p>funciones: rastreo, arancel, tributos</p></div></div>
+<div class="card" style="background:var(--navy);border:0"><table>
+<tr><td>Proyecto</td><td style="color:#fff">SaaS LogiBot: gestor de chatbots con IA para consultas aduaneras y trazabilidad de carga internacional</td></tr>
+<tr><td>Nivel</td><td style="color:#fff">2 – Aplicación</td></tr>
+<tr><td>Categoría</td><td style="color:#fff">C: Negocios Internacionales y Cadena de Valor</td></tr>
+<tr><td>Eje</td><td style="color:#fff">Tecnología 2.1</td></tr>
+<tr><td>Modo AGCS (OMC)</td><td style="color:#fff">Modo 1: suministro transfronterizo, Perú → México y Chile</td></tr>
+<tr><td>Mercados</td><td style="color:#fff">México (SAT/ANAM) y Chile (Servicio Nacional de Aduanas)</td></tr></table></div></div></section>
+
+<footer>© 2026 LogiBot · Prototipo académico. Las cifras y tasas del simulador son referenciales y no sustituyen asesoría aduanera.</footer>
+
+<script>
+const $=id=>document.getElementById(id),msgs=$('msgs'),inp=$('inp');
+const CONT={
+MSKU9048210:"Contenedor Reefer 40' · Canal Verde\nUbicación: Puerto del Callao (Muelle Sur)\nEstado: <span class='ok'>listo para levante autorizado</span>\nProducto: palta hass · Temp. set: 5 °C",
+CMAU4512893:"Contenedor 40' HC · En tránsito\nNave: CMA CGM Pacific · Destino: Puerto de Manzanillo (México)\nETA: 9 días · Estado: zarpó del Callao, sin incidencias",
+TGHU7731045:"Contenedor 20' · En tránsito\nDestino: Puerto de San Antonio (Chile)\nETA: 4 días · Estado: navegando, documentos validados",
+};
+const HS=[
+{k:["palta","aguacate","hass"],c:"0804.40.00.00",d:"Aguacates (paltas), frescos o secos",a:"0 %"},
+{k:["laptop","portátil","portatil","computadora"],c:"8471.30.00.00",d:"Máquinas automáticas para tratamiento de datos, portátiles, peso ≤10 kg",a:"0 %"},
+{k:["polo","camiseta","t-shirt"],c:"6109.10.00.00",d:"T-shirts y camisetas de punto, de algodón",a:"11 %"},
+{k:["café","cafe"],c:"0901.11.90.00",d:"Café sin tostar ni descafeinar",a:"0 %"},
+{k:["arándano","arandano","blueberr"],c:"0810.40.00.00",d:"Arándanos rojos, mirtilos y demás frutos del género Vaccinium, frescos",a:"0 %"},
+{k:["quinua","quinoa"],c:"1008.50.90.00",d:"Quinua (Chenopodium quinoa)",a:"0 %"}];
+const TAX={Perú:{ad:.06,igv:.16,ipm:.02,n:"IGV 16 % + IPM 2 %",lbl:"IGV"},México:{ad:.10,igv:.16,ipm:0,n:"IVA 16 %",lbl:"IVA"},Chile:{ad:.06,igv:.19,ipm:0,n:"IVA 19 %",lbl:"IVA"}};
+let flow=null,cif=0;
+function add(t,w,html){const d=document.createElement('div');d.className='m '+w;html?d.innerHTML=t:d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
+function bot(t,chips){const ty=add("LogiBot está escribiendo…",'b typing');setTimeout(()=>{ty.remove();const m=add(t,'b',true);if(chips){const c=document.createElement('div');c.className='chips';chips.forEach(x=>{const b=document.createElement('button');b.textContent=x;b.onclick=()=>handle(x);c.appendChild(b)});m.appendChild(c)}msgs.scrollTop=msgs.scrollHeight},650)}
+const money=n=>"US$ "+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function handle(raw){
+ const t=raw.trim();if(!t)return;add(t,'u');inp.value='';
+ const low=t.toLowerCase(),up=t.toUpperCase().replace(/\s/g,'');
+ if(flow==='cif'){const v=parseFloat(low.replace(/[^0-9.]/g,''));if(!v){bot("Ingresa solo el valor CIF en USD, por ejemplo: 10000");return}cif=v;flow='pais';bot("Valor CIF: <b>"+money(v)+"</b>. ¿Cuál es el país de destino?",["Perú","México","Chile"]);return}
+ if(flow==='pais'){const p=Object.keys(TAX).find(k=>low.includes(k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))||low.includes(k.toLowerCase()));if(!p){bot("Elige un país: Perú, México o Chile.",["Perú","México","Chile"]);return}
+  const x=TAX[p],ad=cif*x.ad,base=cif+ad,igv=base*x.igv,ipm=base*x.ipm,tot=ad+igv+ipm;flow=null;
+  bot("<b>Liquidación estimada · "+p+"</b>\nValor CIF: "+money(cif)+"\nAd-Valorem ("+(x.ad*100)+" %): "+money(ad)+"\n"+x.lbl+" ("+(x.igv*100)+" %): "+money(igv)+(x.ipm?"\nIPM (2 %): "+money(ipm):"")+"\n<b>Total tributos: "+money(tot)+"</b>\nCosto total puesto en destino: "+money(cif+tot)+"\n<i>Estimación referencial; la liquidación oficial la emite la aduana.</i>",["Rastrear MSKU9048210","Clasificar laptop gamer"]);return}
+ const code=Object.keys(CONT).find(c=>up.includes(c));
+ if(code){bot("<b>"+code+"</b>\n"+CONT[code]+"\n<i>Fuente simulada vía API naviera.</i>",["Calcular tributos"]);return}
+ if(/^[A-Z]{4}\d{7}$/.test(up)){bot("No encuentro <b>"+esc(up)+"</b> en la demo. Prueba con MSKU9048210, CMAU4512893 o TGHU7731045.",["MSKU9048210","CMAU4512893","TGHU7731045"]);return}
+ if(/tribut|calcul|liquid|arancel|impuesto|cif/.test(low)&&!HS.some(h=>h.k.some(k=>low.includes(k)))){flow='cif';bot("Vamos a calcular tus tributos. ¿Cuál es el <b>valor CIF en USD</b>?");return}
+ const h=HS.find(h=>h.k.some(k=>low.includes(k)));
+ if(h){bot("<b>Clasificación sugerida</b>\nSubpartida nacional: <b>"+h.c+"</b>\nDescripción: "+h.d+"\nAd-Valorem: <b>"+h.a+"</b>\nConfianza: alta · Base: Sistema Armonizado\n<i>Validar con agente de aduana antes de declarar.</i>",["Calcular tributos"]);return}
+ if(/hola|buenas|ayuda|menu|menú/.test(low)){bot("¡Hola! Soy LogiBot. Puedo rastrear un contenedor, clasificar un producto o calcular tributos.",["MSKU9048210","palta hass fresca","Calcular tributos"]);return}
+ bot("No reconocí esa consulta. Escribe un código de contenedor, un producto (ej. quinua) o «calcular tributos».",["CMAU4512893","polo de algodón","Calcular tributos"]);
+}
+$('send').onclick=()=>handle(inp.value);
+inp.addEventListener('keydown',e=>{if(e.key==='Enter')handle(inp.value)});
+document.querySelectorAll('.q').forEach(b=>b.onclick=()=>{handle(b.dataset.t);$('demo').scrollIntoView()});
+bot("¡Hola! Soy <b>LogiBot</b>, tu asistente aduanero. ¿Qué necesitas hoy?",["MSKU9048210","palta hass fresca","Calcular tributos"]);
+// contadores
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const el=e.target,n=+el.dataset.c;let i=0;const s=setInterval(()=>{el.textContent=++i;if(i>=n)clearInterval(s)},Math.max(12,900/n));io.unobserve(el)}}));
+document.querySelectorAll('[data-c]').forEach(e=>io.observe(e));
+</script>
+</body>
+</html>
